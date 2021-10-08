@@ -63,12 +63,24 @@ public void addPossibleMoves(Square start,Square[][] squares,ArrayList<Square> p
 }
     public void showPossibleMoves(Square start, Square[][] squares) {
         simulatingMoves=true;
+
         for(Square[]sq:squares)
             for (Square s : sq)
                 if (canMove(start, s, squares))
                     s.setColloredIcon();
+
         simulatingMoves=false;
     }
+    public void evaluateScore(Square start,Square[][]squares){
+        simulatingMoves=true;
 
+        for(Square[]sq:squares)
+            for (Square s : sq)
+                if (canMove(start, s, squares))
+                {
+                    s.subtractScore();
+                }
+        simulatingMoves=false;
+    }
 }
 

@@ -4,6 +4,7 @@ import javax.swing.*;
 public class Square extends JButton {
     private Pieces Piece;
     private int i, j, possibleI,possibleJ;
+    private int score=0;
     public Square(int i, int j, Pieces Piece) {
         this.setPiece(Piece);
         this.setI(i);
@@ -17,6 +18,18 @@ public class Square extends JButton {
         this.setPossibleJ(possibleJ);
     }
 
+    public void clearScore(){
+        score=0;
+    }
+    public int getScore(){
+        return score;
+    }
+    public void addScore(){
+        score++;
+    }
+    public void subtractScore(){
+        score--;
+    }
     public Square getPossibleSquare() { // used in PossibleMoves Array
         return new Square(possibleI,possibleJ,getPiece());
     }
