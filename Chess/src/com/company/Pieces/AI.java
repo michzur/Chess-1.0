@@ -8,32 +8,31 @@ public class AI {
     boolean isWhite;
     Square[][] squares;
     public AI(boolean isWhite,Square[][] squares) {
-
+        positionChecker(squares);
        this.isWhite=isWhite;
        this.squares= squares;
     }
 
     public Square randomMove() {
-        positionChecker(squares);
         int random = ((int) (Math.random() * possibleMoves.size()));
         return possibleMoves.get(random);
     }
 
     public Square move(Square[][] board) {
-        positionChecker(squares);
         TreeMap<Integer, Square> map = new TreeMap<>();
-        for (Square sq : possibleMoves) {
+        for (Square sq : possibleMoves)
+        {
             int points = 0;
-            Pieces enemyPiece = board[sq.getPossibleI()][sq.getPossibleJ()].getPiece();
+            Square endSquare = board[sq.getPossibleI()][sq.getPossibleJ()];
             Pieces piece = sq.getPiece();
-            if (!enemyPiece.getType().equals("empty")) {   //points granted by capturing enemy piece
+            if (!endSquare.getPiece().getType().equals("empty")) {   //points granted by capturing enemy piece
                 points++;
             }
-            map.put(sq.getScore()+points, sq);
+            map.put(endSquare.getScore()+points, sq);
         }
-        for (Map.Entry<Integer, Square> entry : map.entrySet()) {
-            System.out.println("Key: " + entry.getKey() + ". Value: " + entry.getValue().getPiece());
-        }
+      //  for (Map.Entry<Integer, Square> entry : map.entrySet()) {
+       //     System.out.println("Key: " + entry.getKey() + ". Value: " + entry.getValue().getPiece().getType()+" Square: i; "+entry.getValue().getI()+" j; "+entry.getValue().getJ());
+     //   }
         if (map.lastKey() > 0) return map.get(map.lastKey());
         return randomMove();
     }
@@ -43,21 +42,17 @@ public class AI {
             for(Square s:sq)
                 System.out.println(s.getScore());
     }
-    int count=0;
-
-
     private void positionChecker(Square[][] squares) {
         possibleMoves.clear();
-        System.out.println("Call AI");
+        System.out.println(isWhite+" Ai white?");
         for (Square[] sq : squares) //adding every possible move to array
             for (Square s : sq)
             {
-
-                if(s.getPiece().getType().equals("empty"))
+                s.clearScore();
+                if(s.getPiece().getType().equals("empty")||s.getPiece().getType().equals("King"))
                     continue;
                 if (s.getPiece().isWhite() != isWhite)
                 {
-                    s.clearScore();
                     s.getPiece().evaluateScore(s, squares);
                     continue;
                 }
@@ -68,5 +63,8 @@ public class AI {
     public ArrayList<Square> getPossibleMoves(){
         positionChecker(squares);
         return possibleMoves;
+    }
+    public Square[][]getSquares(){
+        return squares;
     }
 }

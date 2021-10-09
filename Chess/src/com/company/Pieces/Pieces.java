@@ -71,16 +71,19 @@ public void addPossibleMoves(Square start,Square[][] squares,ArrayList<Square> p
 
         simulatingMoves=false;
     }
+
     public void evaluateScore(Square start,Square[][]squares){
         simulatingMoves=true;
-
         for(Square[]sq:squares)
-            for (Square s : sq)
-                if (canMove(start, s, squares))
-                {
+            for (Square s : sq) {
+                if (canMove(start, s, squares)) {
+                //    System.out.println("Color "+start.getPiece().isWhite()+" type; "+start.getPiece().getType()+" end; "+" i;"+s.getI()+" j; "+s.getJ()+" Type; "+s.getPiece().getType());
                     s.subtractScore();
                 }
+            }
         simulatingMoves=false;
     }
+
+
 }
 

@@ -5,6 +5,7 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.*;
 
 public class Board  extends JFrame {
@@ -13,48 +14,39 @@ public class Board  extends JFrame {
     private boolean selected = false;
     private Square[][] squares; // Square is a JButton extension containing Piece
     HashMap<Boolean,Square> kingsMap=new HashMap<>();
-    HashMap<Square,Pieces> boardMap=new HashMap<>();
     private final HandlerClass handler = new HandlerClass(); // mouse detection
     Stack<Square[]> moves=new Stack<>(); // @TODO history implementation
     Square start,end;
-
-    String fenStarting="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    public Board() {
+    private boolean isWhitePC;
+    public Board(String fen) {
         super("Chess");
-        fenImplementation(fenStarting);
+        loadFen(fen);
         setupWindow();
         display();
-
+        menuBar();
+    }
+    public Board(String fen,boolean isWhitePC) {
+        super("Chess");
+        loadFen(fen);
+        setupWindow();
+        display();
+        menuBar();
+        this.isWhitePC=isWhitePC;
+        if(isWhitePC==isWhiteTurn)
+            computerMove();
     }
 
-    private void fenImplementation(String fen){
+    private void loadFen(String fen){
         squares = new Square[8][8];
         for(int i=0;i<8;i++)
         for(int j=0;j<8;j++)
            squares[i][j] = new Square(i, j, new Empty());
-     /*   HashMap<Character,Pieces> pieceTypeSymbol=new HashMap<>(){{
-            put('k',new King(true,"Pictures\\whiteKing.png"));
-            put('p',new Pawn(true,"Pictures\\whitePawn.png"));
-            put('n',new Knight(true,"Pictures\\whiteKnight.png"));
-            put('b',new Bishop(true,"Pictures\\whiteBishop.png"));
-            put('r',new Rook(true,"Pictures\\whiteRook.png"));
-            put('q',new Queen(true,"Pictures\\whiteQueen.png"));
-
-            put('K',new King(false,"Pictures\\blackKing.png"));
-            put('P',new Pawn(false,"Pictures\\blackPawn.png"));
-            put('N',new Knight(false,"Pictures\\blackKnight.png"));
-            put('B',new Bishop(false,"Pictures\\blackBishop.png"));
-            put('R',new Rook(false,"Pictures\\blackRook.png"));
-            put('Q',new Queen(false,"Pictures\\blackQueen.png"));
-      }};
-      */
-
         String fenBoard=fen.split(" ")[0];
-        int i=7,j=0,jump=0;
+        int i=0,j=0;
         for(char symbol:fenBoard.toCharArray()) {
             if (symbol == '/') {
                 j = 0;
-                i--;
+                i++;
             } else {
                 if (Character.isDigit(symbol))
                  j+=Character.getNumericValue(symbol);
@@ -62,19 +54,20 @@ public class Board  extends JFrame {
                     Pieces p=null;
                     switch (symbol)
                     {
-                        case 'k' -> p=new King(true,"Pictures\\whiteKing.png");
-                        case 'p' -> p=new Pawn(true,"Pictures\\whitePawn.png");
-                        case 'n' -> p=new Knight(true,"Pictures\\whiteKnight.png");
-                        case 'b' -> p=new Bishop(true,"Pictures\\whiteBishop.png");
-                        case 'r' -> p=new Rook(true,"Pictures\\whiteRook.png");
-                        case 'q' -> p=new Queen(true,"Pictures\\whiteQueen.png");
+                        case 'K' -> p=new King(true,"Pictures\\whiteKing.png");
+                        case 'P' -> p=new Pawn(true,"Pictures\\whitePawn.png");
+                        case 'N' -> p=new Knight(true,"Pictures\\whiteKnight.png");
+                        case 'B' -> p=new Bishop(true,"Pictures\\whiteBishop.png");
+                        case 'R' -> p=new Rook(true,"Pictures\\whiteRook.png");
+                        case 'Q' -> p=new Queen(true,"Pictures\\whiteQueen.png");
 
-                        case 'K' -> p=new King(false,"Pictures\\blackKing.png");
-                        case 'P' -> p=new Pawn(false,"Pictures\\blackPawn.png");
-                        case 'N' -> p=new Knight(false,"Pictures\\blackKnight.png");
-                        case 'B' -> p=new Bishop(false,"Pictures\\blackBishop.png");
-                        case 'R' -> p=new Rook(false,"Pictures\\blackRook.png");
-                        case 'Q' -> p=new Queen(false,"Pictures\\blackQueen.png");
+                        case 'k' -> p=new King(false,"Pictures\\blackKing.png");
+                        case 'p' -> p=new Pawn(false,"Pictures\\blackPawn.png");
+                        case 'n' -> p=new Knight(false,"Pictures\\blackKnight.png");
+                        case 'b' -> p=new Bishop(false,"Pictures\\blackBishop.png");
+                        case 'r' -> p=new Rook(false,"Pictures\\blackRook.png");
+                        case 'q' -> p=new Queen(false,"Pictures\\blackQueen.png");
+
                     }
                     squares[i][j]=(new Square(i,j,p));
 
@@ -140,8 +133,8 @@ public class Board  extends JFrame {
         JFrame frame = new JFrame(text);
         frame.setAlwaysOnTop(true);
         frame.setSize(new Dimension(250,100));
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setLocationByPlatform(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(this);
         frame.setVisible(true);
         frame.setResizable(false);
 
@@ -157,8 +150,6 @@ public class Board  extends JFrame {
         exit.addActionListener(e -> System.exit(0));// on click stop the program
         exit.setFocusable(false);
         exit.setBackground(Color.lightGray);
-
-      //  JLabel label=new JLabel(text); // label with winner text
         JPanel panel=new JPanel();
         panel.add(new JLabel(text));
         panel.add(newGame);
@@ -191,8 +182,13 @@ public class Board  extends JFrame {
     private void endOfPlayerTurn() {
         Square currentKingSquare=kingsMap.get(isWhiteTurn);
         King currentKing=(King)currentKingSquare.getPiece();
-        if (!currentKing.isInCheckAfterMove(start, end, squares))
-        {   // making move only if King is not in danger
+        System.out.println(currentKing.isRookInLine(squares,currentKingSquare));
+       // AI ai=new AI(isWhiteTurn,squares);
+       // squares=ai.getSquares();
+
+
+     //   if (currentKing.isSafeAfterMove(end))
+      //  {   // making move only if King is not in danger
             if(start.getPiece().getType().equals("King")) // updating kingsmap position
                 kingsMap.put(isWhiteTurn,end);
 
@@ -204,29 +200,42 @@ public class Board  extends JFrame {
             moves.push(new Square[]{start,end});
             selected = false;
             display();
-        }
+     //   }
         if (currentKing.isMate(currentKingSquare, squares,new AI(isWhiteTurn,squares).getPossibleMoves()))
         {
             String winner = isWhiteTurn ? "Black" : "White";
             winWindow("    Check Mate " + winner + " has won! ");
         }
 
-        if(!isWhiteTurn) {
-            computerMove();
+        if(isWhiteTurn==isWhitePC) {
+       //     computerMove();
         }
     }
 
     private void computerMove() {
         AI ai=new AI(isWhiteTurn,squares);
+        if(ai.getPossibleMoves().size()==0)
+        {
+            winWindow("Winner winner chicken dinner");
+            return;
+        }
         Square computerSquare=ai.randomMove();
         start = computerSquare;
         selected = true;
+
         end=computerSquare.getPossibleSquare();
         endOfPlayerTurn();
     }
     private void reset() {
         this.dispose(); // closing window
-        Board board=new Board();    // initiating new Board
+        Board board=new Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");    // initiating new Board
+    }
+    private void reset(String fen) {
+        this.dispose(); // closing window
+        Board board=new Board(fen);    // initiating new Board
+    }
+    private Square getCurrentSq(MouseEvent e){
+        return (Square)e.getSource();
     }
     private class HandlerClass implements MouseListener {
         public void mouseClicked(MouseEvent e) {
@@ -248,39 +257,25 @@ public class Board  extends JFrame {
         public void mouseExited(MouseEvent e) {
         }
     }
-
-}
-    /*private void initiatePieces() {
-        squares = new Square[8][8];
-        squares[7][4] = new Square(7, 4, new King(true, "Pictures\\whiteKing.png"));
-        kingsMap.put(true,squares[7][4]);
-        squares[0][4] = new Square(0, 4, new King(false, "Pictures\\blackKing.png"));
-        kingsMap.put(false,squares[0][4]);
-        squares[7][7] = new Square(7, 7, new Rook(true, "Pictures\\whiteRook.png"));
-        squares[7][0] = new Square(7, 0, new Rook(true, "Pictures\\whiteRook.png"));
-        squares[0][7] = new Square(0, 7, new Rook(false, "Pictures\\blackRook.png"));
-        squares[0][0] = new Square(0, 0, new Rook(false, "Pictures\\blackRook.png"));
-        for (int i = 0; i < 8; i++)
-        {
-            squares[6][i] = new Square(6, i, new Pawn(true, "Pictures\\whitePawn.png"));
-            squares[1][i] = new Square(1, i, new Pawn(false, "Pictures\\blackPawn.png"));
-        }
-        squares[7][6] = new Square(7, 6, new Knight(true, "Pictures\\whiteKnight.png"));
-        squares[7][1] = new Square(7, 1, new Knight(true, "Pictures\\whiteKnight.png"));
-        squares[0][6] = new Square(0, 6, new Knight(false, "Pictures\\blackKnight.png"));
-        squares[0][1] = new Square(0, 1, new Knight(false, "Pictures\\blackKnight.png"));
-        squares[7][5] = new Square(7, 5, new Bishop(true, "Pictures\\whiteBishop.png"));
-        squares[7][2] = new Square(7, 2, new Bishop(true, "Pictures\\whiteBishop.png"));
-        squares[0][5] = new Square(0, 5, new Bishop(false, "Pictures\\blackBishop.png"));
-        squares[0][2] = new Square(0, 2, new Bishop(false, "Pictures\\blackBishop.png"));
-        squares[7][3] = new Square(7, 3, new Queen(true, "Pictures\\whiteQueen.png"));
-        squares[0][3] = new Square(0, 3, new Queen(false, "Pictures\\blackQueen.png"));
-
-        for (int i = 2; i < 6; i++)
-            for (int j = 0; j < 8; j++)
-                squares[i][j] = new Square(i, j, new Empty());
-
+    private JMenuItem createItem(String title,JMenu menu){
+        JMenuItem menuItem = new JMenuItem(title,
+                new ImageIcon("images/newfile.png"));
+        menu.add(menuItem);
+    return menuItem;
     }
 
-
-     */
+    private void menuBar(){
+        JMenu menu = new JMenu("Menu");
+        menu.setMnemonic(KeyEvent.VK_F);
+     //   menu.getAccessibleContext().setAccessibleDescription("Dealing with Files");
+// create menu item and add it to the menu
+        JMenuItem reset=createItem("Reset",menu);
+        reset.addActionListener(e ->reset());
+        JMenuItem loadFEN=createItem("loadFEN",menu);
+        loadFEN.addActionListener(e -> reset(JOptionPane.showInputDialog("enter Fen String")));
+        JMenuBar menuBar=new JMenuBar();
+        menuBar.add(menu);
+        this.setJMenuBar(menuBar);
+        this.pack();
+    }
+}
