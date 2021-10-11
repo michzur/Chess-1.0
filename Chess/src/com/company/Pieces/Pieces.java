@@ -1,9 +1,18 @@
 package com.company.Pieces;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
-
 public class Pieces {
+    public Point north=new Point(0,1);
+    public Point northEast=new Point(1,1);
+    public Point south=new Point(0,-1);
+    public Point southEast=new Point(1,-1);
+    public Point east=new Point(1,0);
+    public Point northWest=new Point(-1,1);
+    public Point west=new Point(-1,0);
+    public Point southWest=new Point(-1,-1);
+    ArrayList<Point> legalMoves;
     protected Boolean white;
     protected String type;
     protected ImageIcon icon;
@@ -11,7 +20,7 @@ public class Pieces {
     protected boolean moved=false;
     protected boolean simulatingMoves=false; // prevents changing variables like moved and hasMovedTwoTilesThisRound
 
-     public Pieces(Boolean white){
+    public Pieces(Boolean white){
         this.white=white;
     }
      public Pieces(){}
@@ -26,9 +35,6 @@ public class Pieces {
     public void setMoved(boolean b){
         moved=b;
     }
-    public boolean getHasMovedTwoTiles() {
-        return hasMovedTwoTilesThisRound;
-    }
     public String getType(){
         return type;
     }
@@ -42,6 +48,26 @@ public class Pieces {
     public void changehasMovedTwoTiles() { // this method is for pawn only
         if(hasMovedTwoTilesThisRound)
             hasMovedTwoTilesThisRound=false;
+    }
+    public boolean canMove(Square start, Square end, Square[][] squares, Point direction) {
+         System.out.println(this.getType());
+         System.out.println(this.legalMoves);
+         if (!legalMoves.contains(direction)
+                 || end.getPiece().isWhite()==isWhite())
+            return false;
+
+         int i = start.getI() + direction.y,
+                 j = start.getJ() + direction.x;
+        while (true)
+        {
+            if (squares[i][j].getPiece().isWhite() == isWhite())
+                return false;
+
+            if(squares[i][j] == end)
+                return true;
+            i+=direction.y;
+            j+=direction.x;
+        }
     }
 
 public boolean canMove(Square start,Square end, Square[][] squares) { // override in child's classes
@@ -71,19 +97,5 @@ public void addPossibleMoves(Square start,Square[][] squares,ArrayList<Square> p
 
         simulatingMoves=false;
     }
-
-    public void evaluateScore(Square start,Square[][]squares){
-        simulatingMoves=true;
-        for(Square[]sq:squares)
-            for (Square s : sq) {
-                if (canMove(start, s, squares)) {
-                //    System.out.println("Color "+start.getPiece().isWhite()+" type; "+start.getPiece().getType()+" end; "+" i;"+s.getI()+" j; "+s.getJ()+" Type; "+s.getPiece().getType());
-                    s.subtractScore();
-                }
-            }
-        simulatingMoves=false;
-    }
-
-
 }
 

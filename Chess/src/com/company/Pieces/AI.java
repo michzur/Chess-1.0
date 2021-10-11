@@ -1,6 +1,5 @@
 package com.company.Pieces;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.TreeMap;
 
 public class AI {
@@ -17,7 +16,6 @@ public class AI {
         int random = ((int) (Math.random() * possibleMoves.size()));
         return possibleMoves.get(random);
     }
-
     public Square move(Square[][] board) {
         TreeMap<Integer, Square> map = new TreeMap<>();
         for (Square sq : possibleMoves)
@@ -53,7 +51,7 @@ public class AI {
                     continue;
                 if (s.getPiece().isWhite() != isWhite)
                 {
-                    s.getPiece().evaluateScore(s, squares);
+                    s.evaluateScore(squares);
                     continue;
                 }
                 s.getPiece().addPossibleMoves(s, squares, possibleMoves);

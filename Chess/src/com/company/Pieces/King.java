@@ -1,16 +1,19 @@
 package com.company.Pieces;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class King extends Pieces {
     public King(boolean white, String iconDir) {
         super(white, iconDir);
+        legalMoves=new ArrayList<>(Arrays.asList(north,south,east,west,northWest,northEast,southEast,southWest));
         type = "King";
         moved = false;
     }
 
-
+/*
     public boolean isRookInLine(Square[][]board,Square kingSquare){
- //@TODO use Square score for isInDangerForKing!
+ //TODO use Square score for isInDangerForKing!
+
         for(int i=kingSquare.getI();i<8;i++) {
             if(board[i][kingSquare.getJ()].getPiece().isWhite() == isWhite())
                 break;
@@ -39,11 +42,9 @@ public class King extends Pieces {
         }
         return false;
     }
+
+ */
     public boolean isInCheck(Square[][]board,Square kingSquare){
-       System.out.println(isRookInLine(board,kingSquare));
-
-
-       // return false;
         return false;
     }
 

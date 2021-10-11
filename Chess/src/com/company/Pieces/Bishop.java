@@ -1,13 +1,19 @@
 package com.company.Pieces;
-public class Bishop extends Pieces {
 
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+public class Bishop extends Pieces {
     public Bishop(boolean white, String iconDir) {
         super(white, iconDir);
+        legalMoves= new ArrayList<>(Arrays.asList(northWest,northEast,southEast,southWest));
         type = "Bishop";
     }
     public Bishop(boolean white) {
         super(white);
     }
+    /*
     public boolean canMove(Square start, Square end, Square[][] squares) {
         int idiff= Math.abs(start.getI()-end.getI());
         int jdiff= Math.abs(start.getJ()-end.getJ());
@@ -27,4 +33,6 @@ public class Bishop extends Pieces {
     }
     return end.getPiece().isWhite()!=start.getPiece().isWhite(); // checking if end Square is free or enemy
     }
+
+     */
 }

@@ -9,6 +9,8 @@ public class Main  extends JFrame {
         String test="8/8/8/3K4/7k/8/6R1/5R2 w - - 0 1";
          Board board=new Board(defaultPosition,false);
             }
+
+
         }
 
 
