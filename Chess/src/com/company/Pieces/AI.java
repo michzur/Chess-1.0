@@ -1,6 +1,5 @@
 package com.company.Pieces;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.TreeMap;
 
 public class AI {
@@ -8,7 +7,7 @@ public class AI {
     boolean isWhite;
     Square[][] squares;
     public AI(boolean isWhite,Square[][] squares) {
-        positionChecker(squares);
+       // positionChecker(squares);
        this.isWhite=isWhite;
        this.squares= squares;
     }
@@ -17,7 +16,6 @@ public class AI {
         int random = ((int) (Math.random() * possibleMoves.size()));
         return possibleMoves.get(random);
     }
-
     public Square move(Square[][] board) {
         TreeMap<Integer, Square> map = new TreeMap<>();
         for (Square sq : possibleMoves)
@@ -42,9 +40,11 @@ public class AI {
             for(Square s:sq)
                 System.out.println(s.getScore());
     }
+    /*
     private void positionChecker(Square[][] squares) {
+
         possibleMoves.clear();
-        System.out.println(isWhite+" Ai white?");
+     //   System.out.println(isWhite+" Ai white?");
         for (Square[] sq : squares) //adding every possible move to array
             for (Square s : sq)
             {
@@ -53,17 +53,21 @@ public class AI {
                     continue;
                 if (s.getPiece().isWhite() != isWhite)
                 {
-                    s.getPiece().evaluateScore(s, squares);
+                    s.evaluateScore(squares);
                     continue;
                 }
                 s.getPiece().addPossibleMoves(s, squares, possibleMoves);
             }
     }
 
+
+
     public ArrayList<Square> getPossibleMoves(){
         positionChecker(squares);
         return possibleMoves;
     }
+       */
+
     public Square[][]getSquares(){
         return squares;
     }

@@ -1,68 +1,49 @@
 package com.company.Pieces;
 
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+
 public class Pawn extends Pieces {
     public Pawn(boolean white, String iconDir) {
         super(white, iconDir);
+        legalMoves = isWhite() ? new ArrayList<>(Arrays.asList(south, southEast, southWest)) : new ArrayList<>(Arrays.asList(north, northEast, northWest));
         type = "Pawn";
-    }
-
-    public void showPossibleMoves(Square start, Square[][] squares) {
-        simulatingMoves = true;
-        for (Square[] sq : squares)
-            for (Square s : sq)
-                if (canMove(start, s, squares))
-                    s.setColloredIcon();
-        simulatingMoves = false;
     }
     private void promote(Square start) {
         String icondir = isWhite() ? "Pictures\\whiteQueen.png" : "Pictures\\blackQueen.png";
         start.setPiece(new Queen(isWhite(), icondir));
     }
-
-    public boolean canCapture(Square start, Square end) { // used only for King moves (default capture is in canMove)
-        int nMove = isWhite() ? 1 : -1;
-        return (start.getI() - end.getI() == nMove && Math.abs(start.getJ() - end.getJ()) == 1) &&
-                (end.getPiece().isWhite() != isWhite());
+    public boolean canMoveEvaluate(Square start, Square end, Square[][]board, Point point){
+        return (point == legalMoves.get(1)
+                || point == legalMoves.get(2))
+                && board[start.getI() + point.y][start.getJ() + point.x].equals(end);
     }
-
-    public boolean canMove(Square start, Square end, Square[][] squares) {
-        int nMove = isWhite() ? 1 : -1;
-        int promoteSquare = isWhite() ? 0 : 7;
-        // MOVE
-        if (end.getPiece().getType().equals("empty"))
-        {
-            if (Math.abs(start.getI() - end.getI()) < 3 && start.getJ() == end.getJ())
-            {
-                if ((start.getI() - end.getI() + -nMove == nMove)
-                        && !moved
-                        && squares[start.getI() + -nMove][start.getJ()].getPiece().getType().equals("empty"))
-                {   // 2 square move
-                    if (!simulatingMoves) hasMovedTwoTilesThisRound = true;
-                    return true;
-                }
-                if (start.getI() - end.getI() == nMove)
-                { // normal move
-                    if (!simulatingMoves && end.getI() == promoteSquare)
-                        promote(start); // promoting if pawn end up on last rank
-
-                    return true;
-                }
-            }
-            if ((squares[start.getI()][end.getJ()].getPiece().hasMovedTwoTilesThisRound)
-                    && (start.getI() - end.getI() == nMove && Math.abs(start.getJ() - end.getJ()) == 1))
-            {   //en passant
-                if (!simulatingMoves) squares[start.getI()][end.getJ()].setPiece(new Empty());
-                return true;
-            }
+    public boolean canMove(Square start, Square end, Square[][] squares, Point point) {
+        if (!legalMoves.contains(point)
+                || end.getPiece().isWhite() == isWhite())
             return false;
-        }
-        // Capture
-        else if (start.getI() - end.getI() == nMove && Math.abs(start.getJ() - end.getJ()) == 1
-                && end.getPiece().isWhite() != isWhite())
-        {
-            if (!simulatingMoves && end.getI() == promoteSquare)
-                promote(start); // promoting if pawn end up on last rank
 
+        if (point.equals(legalMoves.get(0)))
+        {
+            int mathAbsI = Math.abs(start.getI() - end.getI());
+            if (mathAbsI > 2) return false;
+            if (mathAbsI == 2)
+            {
+                if(moved) return false;
+                if (!simulatingMoves) hasMovedTwoTilesThisRound = true;
+            }
+            return end.getPiece().getType().equals("empty");
+        }
+
+        if (!end.getPiece().getType().equals("empty"))   // capture
+            return squares[start.getI() + point.y][start.getJ() + point.x] == end;
+
+        //en passant
+        if (squares[start.getI()][end.getJ()].getPiece().hasMovedTwoTilesThisRound)
+        {
+            if(!simulatingMoves) squares[start.getI()][end.getJ()].setPiece(new Empty());
             return true;
         }
         return false;

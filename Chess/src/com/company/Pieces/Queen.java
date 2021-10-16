@@ -1,15 +1,15 @@
 package com.company.Pieces;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class Queen extends Pieces {
+
     public Queen(boolean white,String iconDir) {
-        super(white, iconDir);
+        super(white, iconDir);legalMoves= new ArrayList<>(Arrays.asList(northWest,northEast,southEast,southWest,north,south,east,west));
         type="Queen";
     }
-    public boolean canMove(Square start,Square end,Square[][]squares) {
-            if(new Bishop(this.isWhite()).canMove(start,end,squares))
-                return true;
-            else return new Rook(this.isWhite()).canMove(start, end, squares);
-    }
+
         }
 
 
