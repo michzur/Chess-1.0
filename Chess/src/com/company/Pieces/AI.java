@@ -7,7 +7,7 @@ public class AI {
     boolean isWhite;
     Square[][] squares;
     public AI(boolean isWhite,Square[][] squares) {
-        positionChecker(squares);
+       // positionChecker(squares);
        this.isWhite=isWhite;
        this.squares= squares;
     }
@@ -40,9 +40,11 @@ public class AI {
             for(Square s:sq)
                 System.out.println(s.getScore());
     }
+    /*
     private void positionChecker(Square[][] squares) {
+
         possibleMoves.clear();
-        System.out.println(isWhite+" Ai white?");
+     //   System.out.println(isWhite+" Ai white?");
         for (Square[] sq : squares) //adding every possible move to array
             for (Square s : sq)
             {
@@ -58,10 +60,14 @@ public class AI {
             }
     }
 
+
+
     public ArrayList<Square> getPossibleMoves(){
         positionChecker(squares);
         return possibleMoves;
     }
+       */
+
     public Square[][]getSquares(){
         return squares;
     }

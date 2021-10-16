@@ -11,6 +11,7 @@ public class Knight extends Pieces {
         legalMoves= new ArrayList<>(Arrays.asList(northWest,northEast,southEast,southWest));
         type="Knight";
     }
+
     public boolean canMove(Square start, Square end, Square[][]board, Point point){
         int absI=Math.abs(start.getI()-end.getI());
         int absJ=Math.abs(start.getJ()-end.getJ());

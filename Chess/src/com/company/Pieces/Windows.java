@@ -56,7 +56,6 @@ public class Windows extends JFrame {
             for(int j=0;j<8;j++)
             {
                 Square sq=new Square(i, j, new Empty());
-                sq.setupColors();
                 squares[i][j] =sq;
             }
         String fenBoard=fen.split(" ")[0];
@@ -96,6 +95,19 @@ public class Windows extends JFrame {
             }
         }
     }
+
+    public void display(Square[][]squares) {
+        for (Square[] sq : squares)
+            for (Square s : sq) {
+                s.setupColors();
+                s.setIcon(s.getPiece().getImageIcon());
+                    s.setBackground(s.background);
+                    if(s.getScore()!=0)
+                        s.setBackground(Color.RED);
+
+            }
+    }
+    /*
     public void display(Square[][]squares) { // resets background color and setting up images
         for (int i = 0; i < squares.length; i++)
             for (int j = 0; j < squares.length; j++)
@@ -111,6 +123,10 @@ public class Windows extends JFrame {
                     currentSQ.setEmptyIcon();
             }
     }
+        */
+
+
+
     public void winWindow(String text) {
         JFrame frame = new JFrame(text);
         frame.setAlwaysOnTop(true);

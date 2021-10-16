@@ -7,6 +7,11 @@ public class Square extends JButton {
     private int i, j, possibleI,possibleJ;
     private int score=0;
     private String color;
+    public Square(Square square) {
+        this.setPiece(square.getPiece());
+        this.setI(square.getI());
+        this.setJ(square.getJ());
+    }
     public Square(int i, int j, Pieces Piece) {
         this.setPiece(Piece);
         this.setI(i);
@@ -36,6 +41,15 @@ public class Square extends JButton {
         return new Square(possibleI,possibleJ,getPiece());
     }
 
+    public boolean checkRange(int i){
+        return (i>=0 && i<=7);
+    }
+    public boolean checkRange(int i,int j){
+        return checkRange(i) && checkRange(j);
+    }
+    public boolean isInBound(){
+        return checkRange(i,j);
+    }
     public int getPossibleI() {
         return possibleI;
     }
@@ -79,6 +93,47 @@ public class Square extends JButton {
     ImageIcon icon;
     Color background;
     ImageIcon coloredIcon;
+    public boolean isInBound(int i,int j){
+        return (i>=0 && i<=7
+                && j>=0 && j<=7);
+    }
+
+
+    private void evaluateScore(Point direction,Square[][] squares,Pieces piece,int i,int j) {
+        if(!isInBound(i,j))
+            return;
+            if (piece.canMove(this, squares[i][j], squares, direction))
+                squares[i][j].subtractScore();
+            else if (isInBound(i+=direction.y,j+=direction.x)
+                    && squares[i][j].getPiece().isWhite() == this.getPiece().isWhite())
+                squares[i][j].subtractScore();
+
+    }
+    private void showPossibleForKnight(Point direction,Square[][] squares,Pieces piece,int i,int j){
+        if(isInBound(i,j)
+                && piece.canMove(this,squares[i][j],squares,direction))
+            squares[i][j].setColloredIcon();
+    }
+
+    public void showPossibleMoves(Square[][] squares) {
+        Pieces piece = getPiece();
+        piece.simulatingMoves = true;
+        for (Point direction : piece.getLegalMoves())
+        {
+            int i = getI() + direction.y;
+            int j = getJ() + direction.x;
+            if (piece.getType().equals("Knight"))
+            {
+                showPossibleForKnight(direction, squares, piece, i + direction.y, j);
+                showPossibleForKnight(direction, squares, piece, i, j + direction.x);
+            }
+            else for (; isInBound(i, j); i += direction.y, j += direction.x)
+                if (piece.canMove(this, squares[i][j], squares, direction))
+                      squares[i][j].setColloredIcon();
+        }
+        piece.simulatingMoves = false;
+    }
+
     public void setupColors(){
         if((i+j)%2==0)
         {
@@ -95,10 +150,6 @@ public class Square extends JButton {
         }
 
     }
-    public void setEmptyIcon(){
-        setIcon(icon);
-        setBackground(background);
-    }
     public void setColloredIcon(){
         if(getPiece().getType().equals("empty"))
         setIcon(coloredIcon);
@@ -107,14 +158,30 @@ public class Square extends JButton {
         return new String("I :"+getI()+" J: "+getJ()+" Type: "+getPiece().getType()+" White? "+getPiece().isWhite());
     }
 
-    public void evaluateScore(Square[][]squares){
-        this.getPiece().simulatingMoves=true;
-        for(Square[]sq:squares)
-            for (Square s : sq)
-            {
-                if (this.getPiece().canMove(this, s, squares))
-                    s.subtractScore();
-            }
-       this.getPiece(). simulatingMoves=false;
+private void knightEvaluate(Point direction,Square[][] squares,Pieces piece,int i,int j){
+    if(isInBound(i,j)
+            && piece.canMoveEvaluate(this,squares[i][j],squares,direction))
+        squares[i][j].subtractScore();
+}
+    public void evaluateScore(Square[][]squares) {
+        Pieces piece = getPiece();
+        piece.simulatingMoves = true;
+        for (Point direction : piece.getLegalMoves())
+            for (int i=getI()+direction.y, j=getJ()+direction.x  ; isInBound(i, j) ; i += direction.y, j += direction.x)
+             {
+                 if(isInBound(i+direction.y,j+direction.x)
+                         && squares[i][j].getPiece().getType().equals("King"))
+                   squares[i+direction.y][j+direction.x].subtractScore();
+
+                 if (piece.getType().equals("Knight")) {
+                     knightEvaluate(direction,squares,piece,i+direction.y,j);
+                     knightEvaluate(direction,squares,piece,i,j+direction.x);
+                     break;
+                 }
+                 if (piece.canMoveEvaluate(this, squares[i][j], squares, direction))
+                     squares[i][j].subtractScore();
+             }
+
+        piece.simulatingMoves = false;
     }
 }
