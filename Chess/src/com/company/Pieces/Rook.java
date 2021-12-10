@@ -8,7 +8,7 @@ public class Rook extends Piece {
     public Rook(boolean white) {
         super(white);
         evaluationPoints= isWhite()? 50:-50;
-        String iconDir=isWhite()?"Pictures\\whiteRook.png":"Pictures\\blackRook.png";
+        String iconDir=isWhite()?"Chess\\Pictures\\whiteRook.png":"Chess\\Pictures\\blackRook.png";
         this.icon=new ImageIcon(iconDir);
         legalMoves= new ArrayList<>(Arrays.asList(north,south,east,west));
         type = "Rook";

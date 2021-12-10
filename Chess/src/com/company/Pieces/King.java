@@ -1,4 +1,6 @@
 package com.company.Pieces;
+import com.company.Board.Square;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -10,7 +12,7 @@ public class King extends Piece {
     public King(boolean white) {
         super(white);
         evaluationPoints= isWhite()? 900:-900;
-        String iconDir=isWhite()?"Pictures\\whiteKing.png" : "Pictures\\blackKing.png";
+        String iconDir=isWhite()?"Chess\\Pictures\\whiteKing.png" : "Chess\\Pictures\\blackKing.png";
         this.icon=new ImageIcon(iconDir);
         legalMoves = new ArrayList<>(Arrays.asList(east, west, north, south, northWest, northEast, southEast, southWest));
         castlingI = isWhite() ? 7 : 0;

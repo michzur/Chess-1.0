@@ -1,5 +1,7 @@
 package com.company.Pieces;
 
+import com.company.Board.Square;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -10,7 +12,7 @@ public class Pawn extends Piece {
     public Pawn(boolean white) {
         super(white);
         evaluationPoints= isWhite()? 10:-10;
-        String iconDir=isWhite()?"Pictures\\whitePawn.png":"Pictures\\blackPawn.png";
+        String iconDir=isWhite()?"Chess\\Pictures\\whitePawn.png":"Chess\\Pictures\\blackPawn.png";
         this.icon=new ImageIcon(iconDir);
         legalMoves = isWhite() ? new ArrayList<>(Arrays.asList(south, southEast, southWest))
                                : new ArrayList<>(Arrays.asList(north, northEast, northWest));

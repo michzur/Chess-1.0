@@ -1,5 +1,7 @@
 package com.company.Pieces;
 
+import com.company.Board.Square;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -67,6 +69,9 @@ public class Piece {
     public void setHasMovedTwoTiles() { // this method is for pawn only
         if (hasMovedTwoTilesThisRound)
             hasMovedTwoTilesThisRound = false;
+    }
+    public void setSimulatingMoves(boolean simulatingMoves){
+        this.simulatingMoves=simulatingMoves;
     }
 
     public boolean isInBound(Square square){

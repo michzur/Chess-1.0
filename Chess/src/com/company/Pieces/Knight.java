@@ -1,5 +1,7 @@
 package com.company.Pieces;
 
+import com.company.Board.Square;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -10,7 +12,7 @@ public class Knight extends Piece {
     public Knight(boolean white) {
         super(white);
         evaluationPoints= isWhite()? 30:-30;
-        String iconDir=isWhite()?"Pictures\\whiteKnight.png":"Pictures\\blackKnight.png";
+        String iconDir=isWhite()?"Chess\\Pictures\\whiteKnight.png":"Chess\\Pictures\\blackKnight.png";
         this.icon=new ImageIcon(iconDir);
         legalMoves= new ArrayList<>(Arrays.asList(northWest,northEast,southEast,southWest));
         type="Knight";
