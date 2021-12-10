@@ -1,84 +1,96 @@
 package com.company.Pieces;
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class King extends Pieces {
+public class King extends Piece {
     int castlingI;
 
-    public King(boolean white, String iconDir) {
-        super(white, iconDir);
+    public King(boolean white) {
+        super(white);
+        evaluationPoints= isWhite()? 900:-900;
+        String iconDir=isWhite()?"Pictures\\whiteKing.png" : "Pictures\\blackKing.png";
+        this.icon=new ImageIcon(iconDir);
         legalMoves = new ArrayList<>(Arrays.asList(east, west, north, south, northWest, northEast, southEast, southWest));
         castlingI = isWhite() ? 7 : 0;
         type = "King";
         moved = false;
     }
 
-    public boolean isInCheck(Square[][] board, Square kingSquare) {
-        return false;
+    private ArrayList<Square>attackers;
+    public ArrayList<Square> getAttackers() {
+        return attackers;
     }
 
-    public boolean isMate(Square start, Square[][] squares, ArrayList<Square> possibleMoves) {
-        return false;
-    }
-
-
-    public boolean isInCheckAfterMove(Square start, Square end, Square[][] square) {
-        //  System.out.println(end.getScore());
-        return end.getScore() == 0;
-    }
-
-    private boolean checkCheck(Square end, Square[][] squares) {
-        return false;
-    }
-
-    /*
-        private boolean checkCheck(Square end, Square[][]squares){
-            for (Square[] sq : squares)
-                    for (Square s : sq)
-                    {
-                        if (!s.getPiece().getType().equals("empty") && s.getPiece().isWhite() != isWhite())
-                            if (s.getPiece().getType().equals("Pawn") || s.getPiece().getType().equals("King"))
-                            {
-                                if (s.getPiece().canCapture(s, end))
-                                    return false;
-                            }
-                            else if (s.getPiece().canMove(s, end, squares))
-                                return false;
+    public ArrayList<Square> getDangerSquares(Square kingSquare, Square[][]squares){
+        ArrayList<Square> dangerSquares=new ArrayList<>();
+        attackers=new ArrayList<>();
+        for(Point point:getLegalMoves())
+        {
+            Square allySquare=null;
+            for (int i = kingSquare.getI() + point.y, j = kingSquare.getJ() + point.x
+                             ; kingSquare.isInBound(i, j)
+                             ; i += point.y, j += point.x)
+            {
+                Square currSquare = squares[i][j];
+                Piece currPiece = currSquare.getPiece();
+                if(currPiece.isWhite()==isWhite())
+                {
+                    if (allySquare == null) allySquare = currSquare;
+                    else break;
+                }
+                if (currPiece.isWhite() != isWhite()
+                        && !currPiece.isTypeEmpty())
+                {
+                    if (currPiece.getType().equals("Knight")
+                            || currPiece.getType().equals("Pawn")
+                            || currPiece.getType().equals("King")){
+                        if(currPiece.canCapture(currSquare,kingSquare,squares,new Point(point.x*-1,point.y*-1)))
+                        {
+                            attackers.add(currSquare);
+                            dangerSquares.add(currSquare);
+                            currSquare.subtractScore(900);
+                        }
+                        break; // Skipping unblockable checks
                     }
-            return true;
+                    if(currPiece.getLegalMoves().contains(new Point(point.x*-1,point.y*-1)))
+                    {
+                        while (squares[i += point.y * -1][j += point.x * -1] != kingSquare)
+                        {
+                            dangerSquares.add(squares[i][j]);
+                            if (allySquare == null) squares[i][j].subtractScore(900);
+                        }
+                        dangerSquares.add(currSquare);
+                        if (allySquare == null) currSquare.subtractScore(900);
+                        attackers.add(currSquare);
+
+                        if (allySquare != null && attackers.size() > 0)
+                            allySquare.getPiece().setPinnedMoves(point, new Point(point.x * -1, point.y * -1));
+                    }
+                    break;
+                }
+            }
         }
-     */
+        return dangerSquares;
+    }
+
     public boolean canMove(Square start, Square end, Square[][] squares, Point direction) {
+        if( !(isInBound(start) || !isInBound(end))) return false;
         if (!squares[start.getI() + direction.y][start.getJ() + direction.x].equals(end)
-                || end.getPiece().isWhite() == isWhite()) {
+                || end.getPiece().isWhite() == isWhite())
+        {
             if (!moved && checkCastlingRules(start, end, squares, direction))
             {
-                if(!simulatingMoves) doCastle(start,end,squares,direction);
+                int rookJ=end.getJ()== 2? 0:7;
+                Square extraSquare=new Square(start.getI(),rookJ,new Empty());
+                extraSquare.setNewPosition(new Square(start.getI(),start.getJ()+direction.x,new Rook(start.getPiece().isWhite()))); // get rook there !
+                start.setExtraSquare(extraSquare);
                 return true;
             }
                 return false;
         }
-        //TODO indanger checker with evaluate score
-        return end.getScore()==0;
-    }
-    private void castleMove(Square oldSquare, Square newSquare, Square[][] squares) {
-        oldSquare.getPiece().setMoved(true);
-        squares[newSquare.getI()][newSquare.getJ()].setPiece(oldSquare.getPiece());
-        squares[oldSquare.getI()][oldSquare.getJ()].setPiece(new Empty());
-    }
-    private void doCastle(Square start,Square end,Square[][] squares, Point direction) {
-        Square rookSquare;
-        if(direction.equals(legalMoves.get(0)))
-        { // 0=east
-            rookSquare=squares[end.getI()][end.getJ()+direction.x];
-        }
-        else{ // moving west
-            rookSquare=squares[end.getI()][end.getJ()+ direction.x*2];
-        }
-        start.getPiece().hasMovedTwoTilesThisRound=true;
-        castleMove(start,end,squares);
-        castleMove(rookSquare,squares[start.getI()][start.getJ()+direction.x],squares);
+        return end.getScore()==0 || end.getScore()==-900;
     }
 
     private boolean checkCastlingRules(Square start, Square end, Square[][] squares, Point direction) {
@@ -86,20 +98,22 @@ public class King extends Pieces {
                 || end.getJ() == 1)
             return false;
 
-        if (!(end.getI() == castlingI)
-                && (end.getJ() == 2 || end.getJ() == 6))
+        if (!(end.getI() == castlingI))
             return false;
 
-        int positionX = start.getJ() + direction.x;
-        if(squares[start.getI()][positionX].getScore()!=0
+        if(!end.isSquareEmpty())
+            return false;
+
+        int positionX = start.getJ() + direction.x; // checking if square next to king is under attack
+        if(start.getScore()!=0 || squares[start.getI()][positionX].getScore()!=0
                   || end.getScore()!=0)
             return false;
 
-        Pieces currentPiece = squares[start.getI()][positionX].getPiece();
+        Piece currentPiece = squares[start.getI()][positionX].getPiece();
         while (!currentPiece.getType().equals("Rook")
                 && positionX > 0 && positionX < 7)
         {
-            if (!currentPiece.getType().equals("empty"))
+            if (!currentPiece.isTypeEmpty())
                 return false;
 
             currentPiece = squares[start.getI()][positionX += direction.x].getPiece();

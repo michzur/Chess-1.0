@@ -1,6 +1,6 @@
 package com.company.Pieces;
 
-public class Empty extends Pieces {
+public class Empty extends Piece {
     public Empty() {
         super();
         legalMoves=null;

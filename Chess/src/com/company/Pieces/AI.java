@@ -1,74 +1,154 @@
 package com.company.Pieces;
+import java.awt.*;
 import java.util.ArrayList;
-import java.util.TreeMap;
 
 public class AI {
-    ArrayList<Square> possibleMoves=new ArrayList<>();
-    boolean isWhite;
-    Square[][] squares;
-    public AI(boolean isWhite,Square[][] squares) {
-       // positionChecker(squares);
-       this.isWhite=isWhite;
-       this.squares= squares;
+    private final ArrayList<Square> possibleMoves=new ArrayList<>();
+    private final boolean isWhite;
+    private final Square[][] squares;
+    private final Square currKingSquare;
+    public AI(Square[][] squares,Square currKingSquare) {
+
+        this.currKingSquare=currKingSquare;
+        King king = (King) currKingSquare.getPiece();
+        this.isWhite= king.isWhite();
+        this.squares= squares;
+        positionChecker();
     }
 
-    public Square randomMove() {
-        int random = ((int) (Math.random() * possibleMoves.size()));
-        return possibleMoves.get(random);
+    public ArrayList<Square> getPossibleMoves(){
+        return possibleMoves;
     }
-    public Square move(Square[][] board) {
-        TreeMap<Integer, Square> map = new TreeMap<>();
-        for (Square sq : possibleMoves)
-        {
-            int points = 0;
-            Square endSquare = board[sq.getPossibleI()][sq.getPossibleJ()];
-            Pieces piece = sq.getPiece();
-            if (!endSquare.getPiece().getType().equals("empty")) {   //points granted by capturing enemy piece
-                points++;
-            }
-            map.put(endSquare.getScore()+points, sq);
+
+    public Square getBestMove(){
+        // picks up random move from possible moves, then evaluate the best piece to capture //@TODO move evaluation + depth
+        int random=(int)(Math.random()*possibleMoves.size()+1);
+        Square bestMove=possibleMoves.get(random);
+        for(Square move:this.getPossibleMoves())
+        {       // capture estimation
+            Piece newPositionPiece=move.getNewPosition().getPiece();
+
+            if(newPositionPiece.getType().equals("empty"))
+                continue;
+
+            if(newPositionPiece.isWhite()!=isWhite
+            && newPositionPiece.getEvaluationPoints() > bestMove.getPiece().getEvaluationPoints())
+                bestMove=move;
         }
-      //  for (Map.Entry<Integer, Square> entry : map.entrySet()) {
-       //     System.out.println("Key: " + entry.getKey() + ". Value: " + entry.getValue().getPiece().getType()+" Square: i; "+entry.getValue().getI()+" j; "+entry.getValue().getJ());
-     //   }
-        if (map.lastKey() > 0) return map.get(map.lastKey());
-        return randomMove();
+        return bestMove;
     }
 
-    private void tester(Square[][]squares){
+    private boolean isInBound(int i){
+        return i < 8 && i>=0;
+    }
+    private boolean isInBound(int i,int j){
+       return isInBound(i) && isInBound(j);
+    }
+
+    private void clear(){
         for(Square[]sq:squares)
-            for(Square s:sq)
-                System.out.println(s.getScore());
-    }
-    /*
-    private void positionChecker(Square[][] squares) {
-
-        possibleMoves.clear();
-     //   System.out.println(isWhite+" Ai white?");
-        for (Square[] sq : squares) //adding every possible move to array
             for (Square s : sq)
             {
                 s.clearScore();
-                if(s.getPiece().getType().equals("empty")||s.getPiece().getType().equals("King"))
-                    continue;
-                if (s.getPiece().isWhite() != isWhite)
-                {
-                    s.evaluateScore(squares);
-                    continue;
-                }
-                s.getPiece().addPossibleMoves(s, squares, possibleMoves);
+                s.getPiece().clearPinnedMoves();
+                s.setExtraSquare(null);
             }
     }
-
-
-
-    public ArrayList<Square> getPossibleMoves(){
-        positionChecker(squares);
-        return possibleMoves;
+    private void evaluate(){
+        for(Square[]sq:squares)
+            for (Square s : sq)
+                if (!s.isSquareEmpty()
+                        && s.getPiece().isWhite() != isWhite)
+                    s.evaluateScore(squares);
     }
-       */
 
-    public Square[][]getSquares(){
-        return squares;
+    private void setPossibleMove(Square start,Square end){
+        Square square=new Square(start);
+        square.setNewPosition(end);
+        possibleMoves.add(square);
+    }
+    private void checkKnightUnderCheck(int i, int j, Point p, Piece currPiece, Square start, ArrayList<Square> dangerSquares, King currKing){
+        if (canKnightMove(i+p.y,j,p,currPiece,start)
+                && (dangerSquares.contains(squares[i+p.y][j]) || currKing.getAttackers().contains(squares[i+p.y][j])))
+            setPossibleMove(start, squares[i + p.y][j]);
+        if (canKnightMove(i,j+p.x,p,currPiece,start)
+                && (dangerSquares.contains(squares[i][j+p.x]) || currKing.getAttackers().contains(squares[i][j+p.x])))
+            setPossibleMove(start, squares[i][j + p.x]);
+    }
+    private boolean canKnightMove(int i, int j, Point p, Piece currPiece, Square start){
+        return isInBound(i, j) && currPiece.canMove(start, squares[i][j], squares, p);
+    }
+    private void checkKnight(int i, int j, Point p, Piece currPiece, Square start){
+        if (canKnightMove(i+p.y,j,p,currPiece,start))
+            setPossibleMove(start, squares[i + p.y][j]);
+        if (canKnightMove(i,j+p.x,p,currPiece,start))
+            setPossibleMove(start, squares[i][j + p.x]);
+    }
+    public void positionChecker() {
+        // Main AI function that creates list of every possible move
+        clear();
+        evaluate();
+        King currKing=(King)currKingSquare.getPiece();
+        ArrayList<Square>dangerSquares= currKing.getDangerSquares(currKingSquare,squares);
+        possibleMoves.clear();
+
+            for (Square[] sq : squares)
+                for (Square start : sq)
+                {
+                    Piece currPiece = start.getPiece();
+                    currPiece.simulatingMoves = true;
+                    if (currPiece.isWhite() != currKing.isWhite()
+                            || currPiece.isTypeEmpty())
+                        continue;
+
+                    for (Point p : currPiece.getLegalMoves())
+                    {
+                        int i = start.getI() + p.y, j = start.getJ() + p.x;
+                        if(!isInBound(i,j))
+                            continue;
+
+                        if (currKingSquare.getScore() != 0)
+                        {  // King under attack
+                            if (currPiece.getType().equals("King")
+                                && squares[i][j].getScore() != -900
+                                        && squares[i][j].getScore() != 0) //-900 indicates danger square without any others attackers
+                                    continue;
+
+                                if (currKing.getAttackers().size() > 1)
+                                    continue;
+                            if (currPiece.getType().equals("Knight"))
+                            {
+                                checkKnightUnderCheck(i,j,p,currPiece,start,dangerSquares,currKing);
+                                continue;
+                            }
+                                for( ;!currPiece.getType().equals("King") && isInBound(i,j); i+=p.y,j+=p.x)
+                                    if (dangerSquares.contains(squares[i][j])
+                                            || currKing.getAttackers().contains(squares[i][j]))
+                                        break;
+
+                                        if(!isInBound(i,j))
+                                            continue;
+
+                            else if(currPiece.canMove(start,squares[i][j],squares,p))
+                                setPossibleMove(start,squares[i][j]);
+
+                               continue;
+                        }
+                            if (currPiece.getType().equals("Knight"))
+                            {
+                                checkKnight(i,j,p,currPiece,start);
+                                continue;
+                            }
+                            while (start.isInBound(i, j)
+                                    && currPiece.canMove(start, squares[i][j], squares, p))
+                            {
+                                setPossibleMove(start, squares[i][j]);
+                                i += p.y;
+                                j += p.x;
+                            }
+
+                        }
+                       currPiece.simulatingMoves = false;
+                    }
     }
 }
