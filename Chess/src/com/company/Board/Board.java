@@ -121,8 +121,11 @@ public class Board {
         wind.display(squares);
         findKing();
 
-        if(((ai=new AI(squares,kingsMap.get(isWhiteTurn))).getPossibleMoves().size()==0))
-            wind.winWindow(isWhiteTurn? "Black is the Winner!" : "White is the winner!");
+        if(((ai=new AI(squares,kingsMap.get(isWhiteTurn))).getPossibleMoves().size()==0)) {
+            wind.winWindow(isWhiteTurn ? "Black is the Winner!" : "White is the winner!");
+            return;
+        }
+
 
         if(!isWhiteTurn)
             endOfPlayerTurn(ai.getBestMove());

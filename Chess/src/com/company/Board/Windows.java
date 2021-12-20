@@ -146,6 +146,7 @@ Board board;
     }
     private void undo(){
         board.unMakeMove(board.getLastMove());
+        board.unMakeMove(board.getLastMove());
         board.display();
     }
     public void menuBar(){

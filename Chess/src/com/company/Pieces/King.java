@@ -12,8 +12,8 @@ public class King extends Piece {
     public King(boolean white) {
         super(white);
         evaluationPoints= isWhite()? 900:-900;
-        String iconDir=isWhite()?"Chess\\Pictures\\whiteKing.png" : "Chess\\Pictures\\blackKing.png";
-        this.icon=new ImageIcon(iconDir);
+     //   String iconDir=isWhite()? "resources/whiteKing.png" : "Pictures\\blackKing.png";
+     //   this.icon=new ImageIcon(iconDir);
         legalMoves = new ArrayList<>(Arrays.asList(east, west, north, south, northWest, northEast, southEast, southWest));
         castlingI = isWhite() ? 7 : 0;
         type = "King";

@@ -17,6 +17,7 @@ public class Square extends JButton {
     ImageIcon icon,coloredIcon;
     Color background;
 
+
     //          Constructors
     public Square(Square square) {
             if(square.hasExtraSquare())
@@ -127,19 +128,12 @@ public class Square extends JButton {
     }
 
     public void setupColors(){
-        if((i+j)%2==0)
-        {
-            color="white";
-            icon=new ImageIcon("Chess\\Pictures\\whitetile.png");
-            coloredIcon=new ImageIcon("Chess\\Pictures\\colloredWhiteTile.png");
-            background=Color.WHITE;
-        }
-            else{
-                color="black";
-                icon=new ImageIcon("Chess\\Pictures\\blacktile.png");
-                coloredIcon=new ImageIcon("Chess\\Pictures\\colloredBlackTile.png");
-            background=Color.BLACK;
-        }
+        color=(i+j)%2==0? "white":"black";
+        String iconDir="/resources/"+color+"Tile";
+        icon=new ImageIcon(getClass().getResource(iconDir+".png"));
+        coloredIcon=new ImageIcon( getClass().getResource(iconDir+"Collored.png"));
+
+        background= color.equals("white") ? Color.WHITE:Color.BLACK;
     }
     public void setColloredIcon(){
         if(getPiece().isTypeEmpty())

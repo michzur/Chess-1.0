@@ -30,8 +30,12 @@ public class Piece {
     // Constructors
     public Piece(Boolean white) {
         this.white = white;
+        String iconDir="/resources/";iconDir+=isWhite()? "white":"black";iconDir+=this.getClass().getSimpleName()+".png";
+
+        this.icon=new ImageIcon(getClass().getResource(iconDir));
     }
     public Piece() {
+
     }
 
 
