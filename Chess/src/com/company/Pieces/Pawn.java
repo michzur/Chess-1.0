@@ -12,8 +12,8 @@ public class Pawn extends Piece {
     public Pawn(boolean white) {
         super(white);
         evaluationPoints= isWhite()? 10:-10;
-        String iconDir=isWhite()?"Chess\\Pictures\\whitePawn.png":"Chess\\Pictures\\blackPawn.png";
-        this.icon=new ImageIcon(iconDir);
+      //  String iconDir=isWhite()?"Pictures\\whitePawn.png":"Pictures\\blackPawn.png";
+    //    this.icon=new ImageIcon(iconDir);
         legalMoves = isWhite() ? new ArrayList<>(Arrays.asList(south, southEast, southWest))
                                : new ArrayList<>(Arrays.asList(north, northEast, northWest));
         promoteRank = isWhite() ? 0:7;
