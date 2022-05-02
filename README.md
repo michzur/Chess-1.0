@@ -3,7 +3,7 @@
 ## Table of contents
 * [General info](#general-info)
 * [Technologies](#technologies)
-* [About Project](#About Project)
+* [About Project](#About-Project)
 
 ## General info
 This project is Chess game created in Java 16 with Java Swing.
