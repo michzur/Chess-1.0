@@ -16,6 +16,7 @@ public class King extends Piece {
      //   this.icon=new ImageIcon(iconDir);
         legalMoves = new ArrayList<>(Arrays.asList(east, west, north, south, northWest, northEast, southEast, southWest));
         castlingI = isWhite() ? 7 : 0;
+        type= "Knight";
         type = "King";
         moved = false;
     }
